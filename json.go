@@ -11,7 +11,7 @@ import (
 // Preload adds json to the given Lua state's package.preload table. After it
 // has been preloaded, it can be loaded using require:
 //
-//  local json = require("json")
+//	local json = require("json")
 func Preload(L *lua.LState) {
 	L.PreloadModule("json", Loader)
 }
@@ -124,6 +124,11 @@ func (j jsonValue) MarshalJSON() (data []byte, err error) {
 				if key.Type() != lua.LTString {
 					err = errInvalidKeys
 					return
+				}
+				const dummyEmptyMap = "__dummy_empty_map"
+				if key.String() == dummyEmptyMap {
+					obj = map[string]jsonValue{}
+					break
 				}
 				obj[key.String()] = jsonValue{value, j.visited}
 				key, value = converted.Next(key)
